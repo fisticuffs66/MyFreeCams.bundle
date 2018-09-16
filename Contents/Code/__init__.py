@@ -7,6 +7,7 @@
 from websocket  import create_connection
 from datetime   import datetime
 from DumbTools  import DumbKeyboard, DumbPrefs
+from updater    import Updater
 
 import urllib, json, re, time
 import requests
@@ -100,7 +101,7 @@ def GetModelData():
 def MainMenu():
     oc = ObjectContainer(title2=TITLE, art=R(ART), no_cache=True)
 
-    #Updater(PREFIX + '/updater', oc)
+    Updater(PREFIX + '/updater', oc)
     
     oc.add(DirectoryObject(
         key     = Callback(CamList, title='All Cams', page=1), 
