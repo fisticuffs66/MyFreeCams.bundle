@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+from urlparse   import parse_qs, urlparse
+
+import urllib, datetime, time
+
+ART             = 'art-default.jpg'
+
+SNAP_URL        = 'https://snap.mfcimg.com/snapimg/{server}/320x240/mfc_{room}?no-cache={unique}'
+PLAYLIST_URL    = 'https://video{server}.myfreecams.com:443/NxServer/ngrp:mfc_{room}.f4v_mobile/playlist.m3u8?nc={unique}'
+
+####################################################################################################
+def MetadataObjectForURL(url):
+    queryString = parse_qs(urlparse(url).query, keep_blank_values=True)
+    
+    modelID     = queryString["i"][0]
+    modelName   = queryString["n"][0]
+    camServer   = queryString["s"][0]
+
+    modelID     = int(modelID) + 100000000
+    camServer   = int(camServer) - 500
+    
+    summary     = ''
+        
+    return VideoClipObject(
+            title           = unicode(modelName.strip()),
+            summary         = unicode('{}'.format(summary.strip())),
+            year            = datetime.datetime.now().year,
+            thumb           = SNAP_URL.format(server=camServer, room=modelID, unique=time.time()),
+            art             = R(ART),
+            content_rating  = 'X'
+        )
+
+####################################################################################################
+def MediaObjectsForURL(url):
+    return [
+        MediaObject(
+            protocol='hls',
+            container='mpegts',
+            video_codec=VideoCodec.H264,
+            audio_codec=AudioCodec.AAC,
+            audio_channels=2,
+            optimized_for_streaming=True,
+            parts=[PartObject(key=Callback(PlayVideo, url=url))]
+        )
+    ]
+
+####################################################################################################
+@indirect
+def PlayVideo(url, **kwargs):   
+    queryString     = parse_qs(urlparse(url).query, keep_blank_values=True)
+
+    modelID         = queryString["i"][0]
+    modelName       = queryString["n"][0]
+    camServer       = queryString["s"][0]
+    
+    modelID         = int(modelID) + 100000000
+    camServer       = int(camServer) - 500
+
+    playlistUrl     = PLAYLIST_URL.format(
+        server  = camServer, 
+        room    = modelID, 
+        unique  = str(time.time())
+    )
+    
+    Log.Debug('PlaylistURL: ' + playlistUrl)
+        
+    return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(playlistUrl))
