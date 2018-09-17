@@ -9,7 +9,7 @@ from datetime   import datetime
 from DumbTools  import DumbKeyboard, DumbPrefs
 from updater    import Updater
 
-import urllib, json, re, time
+import urllib, json, re, time, ssl
 import requests
 
 
@@ -50,7 +50,7 @@ def GetModelData():
     send_msg_ping   = "0 0 0 0 0\n\0"
     send_msg_logout = "99 0 0 0 0"    
 
-    ws = create_connection(WEBSOCKET_URL)
+    ws = create_connection(WEBSOCKET_URL, sslopt={"cert_reqs": ssl.CERT_NONE})
 
     ws.send(send_msg_hello)
     ws.send(send_msg_login)
