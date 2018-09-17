@@ -11,6 +11,7 @@ from updater    import Updater
 
 import urllib, json, re, time, ssl
 import requests
+import certifi
 
 
 PREFIX          = '/video/myfreecams'
@@ -128,8 +129,13 @@ def CamList(title, page=1):
         unique      = time.time()
     )
 
-    response    = urllib.urlopen(request)
+    response    = requests.get(request, verify=False)
+    contents    = response.text.splitlines()
+
+    """
+    response    = urllib.urlopen(request, context=context)
     contents    = str(response.read()).splitlines()
+    """
 
     for line in contents:
         if 'aList[' in line:
